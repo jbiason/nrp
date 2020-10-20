@@ -18,10 +18,18 @@
 
 mod actions;
 mod args;
+mod database;
 
 fn main() {
     match args::parse() {
-        Ok(x) => println!("Ok: {:?}", x),
+        Ok(x) => {
+            println!("Ok: {:?}", x);
+            if let Ok(_db) = database::Database::load() {
+                println!("Has db");
+            } else {
+                println!("Do not has db");
+            }
+        }
         Err(x) => println!("Error {:?}", x),
     }
 }
