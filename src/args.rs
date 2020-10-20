@@ -25,10 +25,7 @@ use clap::Arg;
 // use clap::ArgMatches;
 use clap::SubCommand;
 
-#[derive(Debug)]
-pub enum Action {
-    Generate(String),
-}
+use crate::actions::Action;
 
 #[derive(Debug)]
 pub enum ParseError {

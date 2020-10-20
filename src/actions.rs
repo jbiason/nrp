@@ -16,12 +16,9 @@
    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-mod actions;
-mod args;
-
-fn main() {
-    match args::parse() {
-        Ok(x) => println!("Ok: {:?}", x),
-        Err(x) => println!("Error {:?}", x),
-    }
+/// List of actions available
+#[derive(Debug)]
+pub enum Action {
+    /// Generate a name from the description.
+    Generate(String),
 }
