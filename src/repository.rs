@@ -10,45 +10,45 @@ use toml;
 type WordStorage = BTreeMap<char, LinkedList<String>>;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Database {
+pub struct WordList {
     adjectives: WordStorage,
     metals: WordStorage,
 }
 
-pub enum DatabaseError {
+pub enum WordListError {
     InvalidFormat,
 }
 
-impl std::convert::From<std::io::Error> for DatabaseError {
-    fn from(_error: std::io::Error) -> DatabaseError {
-        DatabaseError::InvalidFormat
+impl std::convert::From<std::io::Error> for WordListError {
+    fn from(_error: std::io::Error) -> WordListError {
+        WordListError::InvalidFormat
     }
 }
 
-impl std::convert::From<toml::de::Error> for DatabaseError {
-    fn from(_error: toml::de::Error) -> DatabaseError {
-        DatabaseError::InvalidFormat
+impl std::convert::From<toml::de::Error> for WordListError {
+    fn from(_error: toml::de::Error) -> WordListError {
+        WordListError::InvalidFormat
     }
 }
 
-impl Database {
+impl WordList {
     /// Create an empty database
     fn empty() -> Self {
-        Database {
+        WordList {
             adjectives: WordStorage::new(),
             metals: WordStorage::new(),
         }
     }
 
     /// Load the database
-    pub fn load() -> Result<Self, DatabaseError> {
+    pub fn load() -> Result<Self, WordListError> {
         if let Ok(mut fp) = File::open("database.toml") {
             let mut content = String::new();
             fp.read_to_string(&mut content)?;
             let data = toml::from_str(&content)?;
             Ok(data)
         } else {
-            Ok(Database::empty())
+            Ok(WordList::empty())
         }
     }
 }

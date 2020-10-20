@@ -22,18 +22,21 @@ use clap::crate_name;
 use clap::crate_version;
 use clap::App;
 use clap::Arg;
-// use clap::ArgMatches;
+use clap::ArgMatches;
 use clap::SubCommand;
 
 use crate::actions::Action;
+
+type ParseResult = Result<Action, ParseError>;
 
 #[derive(Debug)]
 pub enum ParseError {
     UnknownCommand,
     MissingDescription,
+    MissingAdjective,
 }
 
-pub fn parse() -> Result<Action, ParseError> {
+pub fn parse() -> ParseResult {
     let params = App::new(crate_name!())
         .version(crate_version!())
         .author(crate_authors!())
@@ -79,12 +82,38 @@ pub fn parse() -> Result<Action, ParseError> {
         );
     let matches = params.get_matches();
     match matches.subcommand() {
-        ("generate", Some(arguments)) => {
-            let description = arguments
-                .value_of("description")
-                .ok_or(ParseError::MissingDescription)?;
-            Ok(Action::Generate(description.to_string()))
-        }
+        ("generate", Some(arguments)) => parse_generate(arguments),
+        ("adjectives", Some(arguments)) => parse_adjectives(arguments),
         _ => Err(ParseError::UnknownCommand),
     }
+}
+
+fn parse_generate(arguments: &ArgMatches) -> ParseResult {
+    let description = arguments
+        .value_of("description")
+        .ok_or(ParseError::MissingDescription)?;
+    Ok(Action::Generate(description.to_string()))
+}
+
+fn parse_adjectives(arguments: &ArgMatches) -> ParseResult {
+    match arguments.subcommand() {
+        ("list", _) => Ok(Action::AdjectiveList),
+        ("add", Some(arguments)) => parse_adjectives_add(arguments),
+        ("rm", Some(arguments)) => parse_adjectives_rm(arguments),
+        (_, _) => Err(ParseError::UnknownCommand),
+    }
+}
+
+fn parse_adjectives_add(arguments: &ArgMatches) -> ParseResult {
+    let adjective = arguments
+        .value_of("adjective")
+        .ok_or(ParseError::MissingAdjective)?;
+    Ok(Action::AdjectiveAdd(adjective.to_string()))
+}
+
+fn parse_adjectives_rm(arguments: &ArgMatches) -> ParseResult {
+    let adjective = arguments
+        .value_of("adjective")
+        .ok_or(ParseError::MissingAdjective)?;
+    Ok(Action::AdjectiveRm(adjective.to_string()))
 }

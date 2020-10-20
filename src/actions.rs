@@ -19,6 +19,12 @@
 /// List of actions available
 #[derive(Debug)]
 pub enum Action {
+    /// List adjectives
+    AdjectiveList,
+    /// Add a new adjective
+    AdjectiveAdd(String),
+    /// Delete an adjective
+    AdjectiveRm(String),
     /// Generate a name from the description.
     Generate(String),
 }
