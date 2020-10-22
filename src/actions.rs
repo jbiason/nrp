@@ -25,6 +25,12 @@ pub enum Action {
     AdjectiveAdd(String),
     /// Delete an adjective
     AdjectiveRm(String),
+    /// List metals
+    MetalList,
+    /// Add a new metal
+    MetalAdd(String),
+    /// Remove a metal
+    MetalRm(String),
     /// Generate a name from the description.
     Generate(String),
 }

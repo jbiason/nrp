@@ -73,24 +73,37 @@ impl WordList {
     /// add an adjective to the word list
     pub fn insert_adjective(adjective: &str) -> Result<(), WordListError> {
         let mut repo = Self::load()?;
-        let initial = adjective
+        Self::insert_word(adjective, &mut repo.adjectives)?;
+        repo.save()
+    }
+
+    /// Add a metal to the word list
+    pub fn insert_metal(metal: &str) -> Result<(), WordListError> {
+        let mut repo = Self::load()?;
+        Self::insert_word(metal, &mut repo.metals)?;
+        repo.save()
+    }
+
+    /// Generic function to insert words in the storage; the target points in which of the lists
+    /// the word should be inserted.
+    fn insert_word(word: &str, target: &mut WordStorage) -> Result<(), WordListError> {
+        let initial = word
             .chars()
             .nth(0)
             .ok_or(WordListError::InvalidWord)?
             .to_string();
-        let mut list = if !repo.adjectives.contains_key(&initial) {
+        let mut list = if !target.contains_key(&initial) {
             let empty_list = LinkedList::new();
             empty_list
         } else {
-            repo.adjectives.get(&initial).unwrap().to_owned()
+            target.get(&initial).unwrap().to_owned()
         };
 
-        if list.contains(&adjective.to_string()) {
+        if list.contains(&word.to_string()) {
             Err(WordListError::WordAlreadyExists)
         } else {
-            list.push_back(adjective.to_string());
-            repo.adjectives.insert(initial, list);
-            repo.save()?;
+            list.push_back(word.to_string());
+            target.insert(initial, list);
             Ok(())
         }
     }

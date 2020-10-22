@@ -24,8 +24,9 @@ fn main() {
     match args::parse() {
         Ok(x) => match x {
             actions::Action::AdjectiveAdd(word) => {
-                repository::WordList::insert_adjective(&word).unwrap();
+                repository::WordList::insert_adjective(&word).unwrap()
             }
+            actions::Action::MetalAdd(word) => repository::WordList::insert_metal(&word).unwrap(),
             _ => unimplemented!(),
         },
         Err(x) => println!("Error {:?}", x),

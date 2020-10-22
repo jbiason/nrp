@@ -34,6 +34,7 @@ pub enum ParseError {
     UnknownCommand,
     MissingDescription,
     MissingAdjective,
+    MissingMetal,
 }
 
 pub fn parse() -> ParseResult {
@@ -84,6 +85,7 @@ pub fn parse() -> ParseResult {
     match matches.subcommand() {
         ("generate", Some(arguments)) => parse_generate(arguments),
         ("adjectives", Some(arguments)) => parse_adjectives(arguments),
+        ("metals", Some(arguments)) => parse_metals(arguments),
         _ => Err(ParseError::UnknownCommand),
     }
 }
@@ -116,4 +118,27 @@ fn parse_adjectives_rm(arguments: &ArgMatches) -> ParseResult {
         .value_of("adjective")
         .ok_or(ParseError::MissingAdjective)?;
     Ok(Action::AdjectiveRm(adjective.to_string()))
+}
+
+fn parse_metals(arguments: &ArgMatches) -> ParseResult {
+    match arguments.subcommand() {
+        ("list", _) => Ok(Action::MetalList),
+        ("add", Some(arguments)) => parse_metal_add(arguments),
+        ("rm", Some(arguments)) => parse_metal_rm(arguments),
+        (_, _) => Err(ParseError::UnknownCommand),
+    }
+}
+
+fn parse_metal_add(arguments: &ArgMatches) -> ParseResult {
+    let metal = arguments
+        .value_of("metal")
+        .ok_or(ParseError::MissingMetal)?;
+    Ok(Action::MetalAdd(metal.to_string()))
+}
+
+fn parse_metal_rm(arguments: &ArgMatches) -> ParseResult {
+    let metal = arguments
+        .value_of("metal")
+        .ok_or(ParseError::MissingMetal)?;
+    Ok(Action::MetalRm(metal.to_string()))
 }
