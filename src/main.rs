@@ -22,14 +22,12 @@ mod repository;
 
 fn main() {
     match args::parse() {
-        Ok(x) => {
-            println!("Ok: {:?}", x);
-            if let Ok(_db) = repository::WordList::load() {
-                println!("Has db");
-            } else {
-                println!("Do not has db");
+        Ok(x) => match x {
+            actions::Action::AdjectiveAdd(word) => {
+                repository::WordList::insert_adjective(&word).unwrap();
             }
-        }
+            _ => unimplemented!(),
+        },
         Err(x) => println!("Error {:?}", x),
     }
 }
