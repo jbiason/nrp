@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::collections::LinkedList;
+use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::{Read, Write};
 
@@ -7,7 +7,7 @@ use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use toml;
 
-pub type WordStorage = BTreeMap<String, LinkedList<String>>;
+pub type WordStorage = BTreeMap<String, BTreeSet<String>>;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WordList {
@@ -19,7 +19,6 @@ pub struct WordList {
 pub enum WordListError {
     InvalidFormat,
     InvalidWord,
-    WordAlreadyExists,
     SaveFailure,
 }
 
@@ -106,18 +105,14 @@ impl WordList {
             .to_string()
             .to_lowercase();
         let mut list = if !target.contains_key(&initial) {
-            let empty_list = LinkedList::new();
+            let empty_list = BTreeSet::new();
             empty_list
         } else {
             target.get(&initial).unwrap().to_owned()
         };
 
-        if list.contains(&word.to_string()) {
-            Err(WordListError::WordAlreadyExists)
-        } else {
-            list.push_back(word.to_string().to_lowercase());
-            target.insert(initial, list);
-            Ok(())
-        }
+        list.insert(word.to_string().to_lowercase());
+        target.insert(initial, list);
+        Ok(())
     }
 }
