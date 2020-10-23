@@ -29,10 +29,14 @@ fn main() {
             actions::Action::AdjectiveAdd(word) => {
                 repository::WordList::insert_adjective(&word).unwrap()
             }
+            actions::Action::AdjectiveRm(word) => {
+                repository::WordList::remove_adjective(&word).unwrap()
+            }
             actions::Action::MetalList => {
                 show_words(&repository::WordList::find_all_metals().unwrap())
             }
             actions::Action::MetalAdd(word) => repository::WordList::insert_metal(&word).unwrap(),
+            actions::Action::MetalRm(word) => repository::WordList::remove_metal(&word).unwrap(),
             _ => unimplemented!(),
         },
         Err(x) => println!("Error {:?}", x),

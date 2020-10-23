@@ -20,6 +20,7 @@ pub enum WordListError {
     InvalidFormat,
     InvalidWord,
     SaveFailure,
+    NoSuchWord,
 }
 
 impl std::convert::From<std::io::Error> for WordListError {
@@ -75,12 +76,6 @@ impl WordList {
         Ok(repo.adjectives)
     }
 
-    /// Get the list of all metals
-    pub fn find_all_metals() -> Result<WordStorage, WordListError> {
-        let repo = Self::load()?;
-        Ok(repo.metals)
-    }
-
     /// Add an adjective to the word list
     pub fn insert_adjective(adjective: &str) -> Result<(), WordListError> {
         let mut repo = Self::load()?;
@@ -88,10 +83,30 @@ impl WordList {
         repo.save()
     }
 
+    /// Remove an adjective
+    pub fn remove_adjective(adjective: &str) -> Result<(), WordListError> {
+        let mut repo = Self::load()?;
+        Self::remove_word(adjective, &mut repo.adjectives)?;
+        repo.save()
+    }
+
+    /// Get the list of all metals
+    pub fn find_all_metals() -> Result<WordStorage, WordListError> {
+        let repo = Self::load()?;
+        Ok(repo.metals)
+    }
+
     /// Add a metal to the word list
     pub fn insert_metal(metal: &str) -> Result<(), WordListError> {
         let mut repo = Self::load()?;
         Self::insert_word(metal, &mut repo.metals)?;
+        repo.save()
+    }
+
+    /// Remove a metal
+    pub fn remove_metal(metal: &str) -> Result<(), WordListError> {
+        let mut repo = Self::load()?;
+        Self::remove_word(metal, &mut repo.metals)?;
         repo.save()
     }
 
@@ -113,6 +128,23 @@ impl WordList {
 
         list.insert(word.to_string().to_lowercase());
         target.insert(initial, list);
+        Ok(())
+    }
+
+    /// Generic function to remove a word from the storage; follows the same logic as insert_word.
+    fn remove_word(word: &str, target: &mut WordStorage) -> Result<(), WordListError> {
+        let initial = word
+            .chars()
+            .nth(0)
+            .ok_or(WordListError::InvalidWord)?
+            .to_string()
+            .to_lowercase();
+        let the_word = word.to_string().to_lowercase();
+        let list = target.get_mut(&initial).ok_or(WordListError::NoSuchWord)?;
+        list.remove(&the_word);
+        if list.is_empty() {
+            target.remove(&initial);
+        }
         Ok(())
     }
 }
