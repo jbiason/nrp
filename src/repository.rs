@@ -7,7 +7,7 @@ use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use toml;
 
-type WordStorage = BTreeMap<String, LinkedList<String>>;
+pub type WordStorage = BTreeMap<String, LinkedList<String>>;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WordList {
@@ -70,7 +70,19 @@ impl WordList {
         Ok(())
     }
 
-    /// add an adjective to the word list
+    /// Get the list of all adjectives
+    pub fn find_all_adjectives() -> Result<WordStorage, WordListError> {
+        let repo = Self::load()?;
+        Ok(repo.adjectives)
+    }
+
+    /// Get the list of all metals
+    pub fn find_all_metals() -> Result<WordStorage, WordListError> {
+        let repo = Self::load()?;
+        Ok(repo.metals)
+    }
+
+    /// Add an adjective to the word list
     pub fn insert_adjective(adjective: &str) -> Result<(), WordListError> {
         let mut repo = Self::load()?;
         Self::insert_word(adjective, &mut repo.adjectives)?;
@@ -91,7 +103,8 @@ impl WordList {
             .chars()
             .nth(0)
             .ok_or(WordListError::InvalidWord)?
-            .to_string();
+            .to_string()
+            .to_lowercase();
         let mut list = if !target.contains_key(&initial) {
             let empty_list = LinkedList::new();
             empty_list
@@ -102,7 +115,7 @@ impl WordList {
         if list.contains(&word.to_string()) {
             Err(WordListError::WordAlreadyExists)
         } else {
-            list.push_back(word.to_string());
+            list.push_back(word.to_string().to_lowercase());
             target.insert(initial, list);
             Ok(())
         }

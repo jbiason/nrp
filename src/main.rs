@@ -23,12 +23,28 @@ mod repository;
 fn main() {
     match args::parse() {
         Ok(x) => match x {
+            actions::Action::AdjectiveList => {
+                show_words(&repository::WordList::find_all_adjectives().unwrap());
+            }
             actions::Action::AdjectiveAdd(word) => {
                 repository::WordList::insert_adjective(&word).unwrap()
+            }
+            actions::Action::MetalList => {
+                show_words(&repository::WordList::find_all_metals().unwrap())
             }
             actions::Action::MetalAdd(word) => repository::WordList::insert_metal(&word).unwrap(),
             _ => unimplemented!(),
         },
         Err(x) => println!("Error {:?}", x),
+    }
+}
+
+fn show_words(list: &repository::WordStorage) {
+    let blank = String::from(" ");
+    for (first_letter, word_list) in list {
+        let heading = first_letter.to_uppercase();
+        for (pos, word) in word_list.iter().enumerate() {
+            println!("{}   {}", if pos == 0 { &heading } else { &blank }, word);
+        }
     }
 }
