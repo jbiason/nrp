@@ -20,6 +20,12 @@ mod actions;
 mod args;
 mod repository;
 
+#[derive(Debug)]
+enum Error {
+    NoAdjectiveWith(String),
+    NoMetalWith(String),
+}
+
 fn main() {
     match args::parse() {
         Ok(x) => match x {
@@ -37,7 +43,9 @@ fn main() {
             }
             actions::Action::MetalAdd(word) => repository::WordList::insert_metal(&word).unwrap(),
             actions::Action::MetalRm(word) => repository::WordList::remove_metal(&word).unwrap(),
-            _ => unimplemented!(),
+            actions::Action::Generate(description) => {
+                println!("{}", generate(&description).unwrap());
+            }
         },
         Err(x) => println!("Error {:?}", x),
     }
@@ -51,4 +59,29 @@ fn show_words(list: &repository::WordStorage) {
             println!("{}   {}", if pos == 0 { &heading } else { &blank }, word);
         }
     }
+}
+
+fn generate(description: &str) -> Result<String, Error> {
+    let content = repository::WordList::load().unwrap();
+
+    let initials = String::from(description)
+        .trim()
+        .split_whitespace()
+        .map(|word| word.chars().nth(0).unwrap().to_string())
+        .collect::<Vec<String>>();
+    let number_of_initials = initials.len() - 1;
+
+    let mut result = Vec::new();
+    for (pos, letter) in initials.iter().enumerate() {
+        result.push(if pos == number_of_initials {
+            content
+                .get_random_metal(&letter)
+                .map_err(|_| Error::NoMetalWith(letter.to_string()))?
+        } else {
+            content
+                .get_random_adjective(&letter)
+                .map_err(|_| Error::NoAdjectiveWith(letter.to_string()))?
+        });
+    }
+    Ok(result.join(" "))
 }

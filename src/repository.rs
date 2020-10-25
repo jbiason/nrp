@@ -3,6 +3,8 @@ use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::{Read, Write};
 
+use rand::prelude::*;
+use rand::thread_rng;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use toml;
@@ -51,7 +53,7 @@ impl WordList {
     }
 
     /// Load the database
-    fn load() -> Result<Self, WordListError> {
+    pub fn load() -> Result<Self, WordListError> {
         if let Ok(mut fp) = File::open("database.toml") {
             let mut content = String::new();
             fp.read_to_string(&mut content)?;
@@ -76,6 +78,11 @@ impl WordList {
         Ok(repo.adjectives)
     }
 
+    /// Return a random adjective with the initial requested
+    pub fn get_random_adjective(&self, initial: &str) -> Result<String, WordListError> {
+        Self::get_random_word(&initial.to_lowercase(), &self.adjectives)
+    }
+
     /// Add an adjective to the word list
     pub fn insert_adjective(adjective: &str) -> Result<(), WordListError> {
         let mut repo = Self::load()?;
@@ -96,6 +103,11 @@ impl WordList {
         Ok(repo.metals)
     }
 
+    /// Return a random metal with the initial requested
+    pub fn get_random_metal(&self, initial: &str) -> Result<String, WordListError> {
+        Self::get_random_word(&initial.to_lowercase(), &self.metals)
+    }
+
     /// Add a metal to the word list
     pub fn insert_metal(metal: &str) -> Result<(), WordListError> {
         let mut repo = Self::load()?;
@@ -108,6 +120,17 @@ impl WordList {
         let mut repo = Self::load()?;
         Self::remove_word(metal, &mut repo.metals)?;
         repo.save()
+    }
+
+    fn get_random_word(initial: &str, storage: &WordStorage) -> Result<String, WordListError> {
+        let mut rng = thread_rng();
+        Ok(storage
+            .get(initial)
+            .ok_or(WordListError::NoSuchWord)?
+            .iter()
+            .choose(&mut rng)
+            .ok_or(WordListError::NoSuchWord)?
+            .to_string())
     }
 
     /// Generic function to insert words in the storage; the target points in which of the lists
